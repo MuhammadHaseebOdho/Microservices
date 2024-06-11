@@ -1,4 +1,4 @@
-package payload;
+package com.hotel.service.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
