@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: UserService
+            uri: lb://UserService
+            predicates:
+              - path= /users/**
+          - id: RatingsService
+            uri: lb://RatingsService
+            predicates:
+              - path= /rating/**
+          - id: HotelService
+            uri: lb://HotelService
+            predicates:
+              - path= /hotel/**
+
+
+
+
+
+
+

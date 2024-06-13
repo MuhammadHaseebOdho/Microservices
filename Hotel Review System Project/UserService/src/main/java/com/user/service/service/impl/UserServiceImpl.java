@@ -4,6 +4,8 @@ import com.user.service.entity.Hotel;
 import com.user.service.entity.Rating;
 import com.user.service.entity.User;
 import com.user.service.exceptions.ResourceNotFoundException;
+import com.user.service.external.HotelService;
+import com.user.service.external.RatingService;
 import com.user.service.repositories.UserRepository;
 import com.user.service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    HotelService hotelService;
+    @Autowired
+    RatingService ratingService;
 
     @Override
     public User saveUser(User user) {
@@ -36,13 +42,15 @@ public class UserServiceImpl implements UserService {
     public List<User> getUsers() {
         List<User> userList = userRepository.findAll();
         List<User> collected = userList.stream().map(user -> {
-            String ratingUrl = "http://RatingsService/rating/" + user.getUserId() + "/user";
-            ResponseEntity<Rating[]> body = restTemplate.getForEntity(ratingUrl, Rating[].class);
-            Rating[] ratingList = body.getBody();
-            List<Rating> list = Arrays.stream(ratingList).toList();
+            //String ratingUrl = "http://RatingsService/rating/" + user.getUserId() + "/user";
+            //ResponseEntity<Rating[]> body = restTemplate.getForEntity(ratingUrl, Rating[].class);
+            //Rating[] ratingList = body.getBody();
+            //List<Rating> list = Arrays.stream(ratingList).toList();
+            List<Rating> list =ratingService.getRatingByUser(user.getUserId());
             List<Rating> collectedList = list.stream().map(rating -> {
-                String hotelUrl = "http://HotelService/hotel/" + rating.getHotelId();
-                Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);
+               /* String hotelUrl = "http://HotelService/hotel/" + rating.getHotelId();
+                Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);*/
+                Hotel hotel =hotelService.getHotelByUser(rating.getHotelId());
                 rating.setHotel(hotel);
                 return rating;
             }).collect(Collectors.toList());
@@ -55,13 +63,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Requested Resource Can not be found on server" + id));
-        String ratingUrl = "http://RatingsService/rating/" + id + "/user";
+       /* String ratingUrl = "http://RatingsService/rating/" + id + "/user";
         ResponseEntity<Rating[]> body = restTemplate.getForEntity(ratingUrl, Rating[].class);
         Rating[] ratingList = body.getBody();
-        List<Rating> list = Arrays.stream(ratingList).toList();
+        List<Rating> list = Arrays.stream(ratingList).toList();*/
+        List<Rating> list =ratingService.getRatingByUser(id);
         List<Rating> ratings = list.stream().map(rating -> {
-            String hotelUrl = "http://HotelService/hotel/" + rating.getHotelId();
-            Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);
+            /*String hotelUrl = "http://HotelService/hotel/" + rating.getHotelId();
+            Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);*/
+            Hotel hotel =hotelService.getHotelByUser(rating.getHotelId());
             rating.setHotel(hotel);
             return rating;
         }).collect(Collectors.toList());
